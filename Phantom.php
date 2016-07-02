@@ -27,11 +27,11 @@ spl_autoload_register('Autoloader::load');
 $shmop = shmop_open(0xff4, "c", 0644, 1);
 shmop_write($shmop, '0', 0);
 
-$bot = new Core\PhantomCore($config['server']['address'], $config['server']['port'], $config['server']['nickname'], $shmop, $config);
+$bot = new Core\PhantomCore($shmop, $config);
 
 $bot->load(true);
 
-class reload
+class Rehash
 {
 	public function __construct($file)
 	{
@@ -43,7 +43,7 @@ while(true)
 {
 	if(shmop_read($shmop, 0, 1) == 1)
 	{
-		new reload('Library/Core/PhantomCore.php');
+		new Rehash('Library/Core/PhantomCore.php');
 		shmop_write($shmop, '1', 0);
 	}
 	

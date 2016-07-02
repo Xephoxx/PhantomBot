@@ -1,31 +1,30 @@
-<?php 
+<?php
 
 return array(
 
-	'server' => array(
+	'server'	=> array(
+		'address' 	=> '127.0.0.1',
+		'portnum' 	=> 6667,
+		'ssl'			=> false,
+		'password'	=> '',
+		'prefix'		=> '@',
+		'channels'	=> array(
+			'#bot'
+		)
+	),
 	
-			'prefix'		=> '@',
-			
-			'address'	=> 'localhost',
-			
-			'port'		=> '6667',			
-			
-			'password'	=> '',
-			
-			'nickname'	=> 'Phantom',
-			
-			'ident'		=> 'root',
-			
-			'nickserv'	=> 'aaa',
-			
-			'oline'		=> array(),
-			
-			'channels'	=> array(
-							'#NCA',
-							'#bot',
-							'#bots'
-			)
-			
+	'ident'	=> array(
+		'nickname'	=> 'Phantom',
+		'username'	=> 'root',
+		'realname'	=> 'Phantom Bot',
+		'nickserv'	=> array(
+			'password'	=> ''
+		)
+	),
+	
+	'oline'	=> array(
+		'username'	=> '',
+		'password'	=> ''
 	)
-
+	
 );

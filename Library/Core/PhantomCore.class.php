@@ -1,6 +1,7 @@
 <?php
 
 namespace Core;
+use Modules;
 
 $path = str_replace('\\', '/', str_replace(array('Library/Core/PhantomCore.php', 'Library\Core\PhantomCore.php'), '', __FILE__));
 
@@ -9,17 +10,189 @@ class PhantomCore
 	public $socket;
 	public $nick;
 	public $size = 512;
-	public $prefix = '%';
+	public $prefix = '@';
 	public $modules;
 	public $modules_regex = array();
 	public $modules_prefix = array();
 	public $modules_alias = array();
 	public $modules_hooks = array();
 	public $config;
-	public $db;
-	public $dbinfo;
 	public $path;
 	public $shmop;
+	
+	public function __construct(&$shmop, $config = array())
+	{
+		global $path;
+		
+		$this->path = $path;
+		$this->shmop = $shmop;
+		$this->config = $config;
+		
+		if(!class_exists('Core\ModuleBase'))
+		{
+			new Core\ModuleBase();
+		}
+		
+		$this->nick = Helpers\Str::trim($config['ident']['nickname']);
+		
+		$address = $config['server']['address'];
+		$portnum = $config['server']['portnum'];
+		
+		$ssl = Helpers\Str::beginsWith('+', $portnum);
+		if($ssl)
+		{
+			$address = 'ssl://' . $address;
+			$portnum = Helpers\Str::after('+', $portnum);
+		}
+		
+		if(isset($config['server']['prefix']))
+		{
+			$this->prefix = Helpers\Str::trim($config['server']['prefix']);
+		}
+		
+		$this->socket = fsockopen($address, $portnum);
+		if($this->socket)
+		{
+			if(isset($config['server']['password']) && strlen($config['server']['password']))
+			{
+				$this->send("PASS {$config['server']['password']}");
+			}
+			
+			$this->send("NICK {$this->nick}");
+			$ident = isset($config['ident']['username']) ? $config['ident']['username'] : $this->nick;
+			$this->send('USER ' . $ident . ' * * :' . $config['ident']['realname']);
+			
+			$count = 0;
+			$pinged = false;
+			while(!$pinged)
+			{
+				$data = fgets($this->socket, $this->size);
+				echo '[RECV] ' . trim($data) . "\n";
+				
+				if(preg_match("/:Nickname is already in use.$/", Helpers\Str::trim($data)))
+				{
+					die('Nickname not available.');
+				}
+				
+				if($count === 10)
+				{
+					break;
+				}
+				
+				if(Helpers\Str::beginsWith('PING :', $data))
+				{
+					$ping = Helpers\Str::after('PING :', $data);
+					$this->send('PONG :' . $ping);
+					$pinged = true;
+				}
+				
+				$count++;
+			}
+			
+			$nickserv = !isset($config['ident']['nickserv'])?false:true;
+			while(!$nickserv)
+			{
+				$data = fgets($this->socket, $this->size);
+				echo '[RECV] ' . trim($data) . "\n";
+				
+				if(preg_match("/^\:NickServ\!NickServ@.* NOTICE {$this->nick} :This nickname is registered./i", Helpers\Str::trim($data)))
+				{
+					$this->privmsg('NickServ', "identify {$config['server']['nickserv']}");
+					$nickserv = true;
+				}
+			}
+			
+			$joined = false;
+			while(!$joined)
+			{
+				$data = fgets($this->socket, $this->size);
+				echo '[RECV] ' . trim($data) . "\n";
+				
+				foreach($config['server']['channels'] as $channel)
+				{
+					@list($channel, $password) = explode(':', $channel);
+					if(Helpers\Str::beginsWith('#', $channel))
+					{
+						$this->send('JOIN ' . $channel . ' ' . $password);
+						usleep(250000);
+					}
+				}
+				$joined = true;
+			}
+		}
+	}	
+	
+	public function load($modules)
+	{
+		$allowed_hooks = array(
+			'beforeCommand',
+			'beforePrefix',
+		);
+		
+		foreach(glob($this->path . 'Library/Modules/*.php') as $module)
+		{
+			require_once($module);
+			$module = strtolower(Helpers\Str::trim(str_replace('.php', '', basename($module))));
+			$class = 'Modules\\' . ucfirst($module);
+			$this->modules[$module] = new $class($this);
+			echo "[INFO] Loaded: {$class}\n";
+			
+			if(!empty($this->modules[$module]->regex))
+			{
+				$this->modules_regex[$module] = $this->modules[$module]->regex;
+			}
+			
+			if(!empty($this->modules[$module]->prefix))
+			{
+				$this->modules_prefix[$module] = $this->modules[$module]->prefix;
+			}
+			
+			if(!empty($this->modules[$module]->alias) && is_array($this->modules[$module]->alias))
+			{
+				foreach($this->modules[$module]->alias as $alias)
+				{
+					$this->modules_alias[$alias] = $module;
+				}
+			}
+			
+			if(!empty($this->modules[$module]->hooks) && is_array($this->modules[$module]->hooks))
+			{
+				foreach ($this->modules[$module]->hooks as $hook)
+				{
+					if(isset($allowed_hooks[$hook]))
+					{
+						$this->modules_hooks[$hook][] = array('hook' => $hook, 'module' => $module);
+					}
+					else
+					{
+						echo "[INFO] {$module}'s hook is not supported.";
+					}
+				}
+			}
+		}
+	}	
+	
+	public function listen()
+	{
+		if(!$this->isConnected())
+		{
+			die("\n\nReached end of socket.\n");
+		}
+		$data = fgets($this->socket, $this->size);
+		echo "[RECV] $data";
+		return $data;
+	}	
+	
+	public function isConnected()
+	{
+		return is_resource($this->socket) && !feof($this->socket);
+	}	
+	
+	public function disconnect($message = 'Quit command issued.')
+	{
+		$this->send('QUIT :' . Helpers\Str::trim($message));
+		fclose($this->socket);
+	}	
 	
 	private function send($signal)
 	{
@@ -32,6 +205,10 @@ class PhantomCore
 		elseif(strstr(trim($signal), 'OPER'))
 		{
 			echo "OPER **** *****\n";
+		}
+		elseif(strstr(trim($signal), 'NICKSERV IDENTIFY'))
+		{
+			echo "PRIVMSG NICKSERV IDENTIFY ****";
 		}
 		else
 		{
@@ -83,62 +260,37 @@ class PhantomCore
 	
 	public function getLevel($user, $channel, $host = '')
 	{
-		echo "GetLevel" . PHP_EOL;
 		$user = trim($user);
 		$host = trim($host);
 		if(!empty($host))
 		{
 			//Override in case mysql connection is dead.
 			$admins = array(
-				/*Nick*/'x2Fusion' => array(
-					'host' => '127.0.0.1',
-					'super' => true
+				'x2fusion' => array(
+					'host'	=> '127.0.0.1',
+					'super'	=> true
 				)
 			);
 			
-			if(in_array(strtolower($user), $admins))
+			if(isset($admins[strtolower($user)]))
 			{
-				if($admins[strtolower($user)]['host'] == strtolower($host))
+				if($admins[strtolower($user)]['host'] === strtolower($host))
 				{
 					return $admins[strtolower($user)]['super'] ? 8 : 7;
 				}
 			}
-			//Otherwise, check mysql
-			/*try
-			{
-				$admin = $this->db->prepare('SELECT `super` FROM `admins` WHERE `nick` = :nick AND `host` = :host');
-				$admin->bindParam(':nick', strtolower($user), PDO::PARAM_STR);
-				$admin->bindParam(':host', strtolower($host), PDO::PARAM_STR);
-				$admin->execute();
-				if($admin->rowCount() > 0)
-				{
-					$super = $admin->fetch();
-					if($super->super == true)
-					{
-						return 8;
-					}
-					else
-					{
-						return 7;
-					}
-				}
-			}
-			catch (PDOException $e)
-			{
-				$this->logE($e);
-			}
-			*/
 		}
+		
 		if(!empty($channel))
 		{
 			$this->send('WHOIS ' . $user);
 			$gotit = false;
-			while (!$gotit)
+			while(!$gotit)
 			{
 				$data = $this->listen();
 				$channelflag = $this->expect($data, 'whoischannel', array('who' => $user, 'channel' => $channel));
 				$end = $this->expect($data, 'endofwhois', array('who' => $user));
-				if ($channelflag !== false)
+				if($channelflag !== false)
 				{
 					$gotit = true;
 					switch ($channelflag[2])
@@ -180,234 +332,6 @@ class PhantomCore
 			}
 		}
 		return 1;
-	}
-	
-	public function __construct($server, $port, $nickname, &$shmop, $config = array())
-	{
-		global $path;
-		$this->path = $path;
-		$ssl = Helpers\Str::beginsWith('+', $port);
-		if($ssl)
-		{
-			$server = 'ssl://' . $server;
-			$port = Helpers\Str::after('+', $port);
-		}
-		$this->nick = Helpers\Str::trim($nickname);
-		if(isset($config['server']['prefix']))
-		{
-			$this->prefix = Helpers\Str::trim($config['server']['prefix']);
-		}
-		$this->config = $config;
-		$this->shmop = $shmop;
-		
-		$this->socket = fsockopen($server, $port);
-		if($this->socket)
-		{
-			if(isset($config['server']['password']) && strlen($config['server']['password']))
-			{
-				$this->send("PASS {$config['server']['password']}");
-			}
-			$this->send("NICK {$this->nick}");
-			$ident = isset($config['server']['ident']) ? $config['server']['ident'] : $this->nick;
-			$this->send("USER {$ident} * * :Phantom Bot");
-			$pinged = false;
-			$nickserv = !isset($config['server']['nickserv'])?false:true;
-			$joined = false;
-			$count = 0;
-			
-			while(!$pinged)
-			{
-				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . "\n";
-				
-				if(preg_match("/:Nickname is already in use.$/", Helpers\Str::trim($data)))
-				{
-					die('Nickname not available.');
-				}
-				
-				if($count == 10)
-				{
-					break;
-				}
-				
-				if(Helpers\Str::beginsWith('PING :', $data))
-				{
-					$ping = Helpers\Str::after('PING :', $data);
-					$this->send('PONG :' . $ping);
-					$pinged = true;
-				}
-				
-				$count++;
-			}
-			
-			while(!$nickserv)
-			{
-				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . "\n";
-				
-				if(preg_match("/^\:NickServ\!NickServ@.* NOTICE {$this->nick} :This nickname is registered./i", Helpers\Str::trim($data)))
-				{
-					$this->privmsg('NickServ', "identify {$config['server']['nickserv']}");
-					$nickserv = true;
-				}
-			}
-
-			while(!$joined)
-			{
-				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . "\n";
-				
-				foreach($config['server']['channels'] as $channel)
-				{
-					@list($channel, $password) = explode(':', $channel);
-					if(Helpers\Str::beginsWith('#', $channel))
-					{
-						$this->send('JOIN ' . $channel . ' ' . $password);
-						usleep(250000);
-					}
-				}
-				$joined = true;
-			}
-		}
-	}
-	
-	public function load($modules)
-	{
-		$allowed_hooks = array(
-			'beforeCommand',
-			'beforePrefix',
-		);
-		if(is_array($modules))
-		{
-			foreach($modules as $module)
-			{
-				$module = strtolower($module);
-				echo $module . PHP_EOL;
-				require_once($this->path . 'Library/Module/' . $module . '.module.php');
-				$class = ucfirst($module);
-				$this->modules[$module] = new $class($this);
-				echo "[INFO] Loaded: {$class}\n";
-				
-				if(!empty($this->modules[$module]->regex))
-				{
-					$this->modules_regex[$module] = $this->modules[$module]->regex;
-				}
-				
-				if (!empty($this->modules[$module]->prefix))
-				{
-					$this->modules_prefix[$module] = $this->modules[$module]->prefix;
-				}
-				
-				if(!empty($this->modules[$module]->alias) && is_array($this->modules[$module]->alias))
-				{
-					foreach ($this->modules[$module]->alias as $alias)
-					{
-						$this->modules_alias[$alias] = $module;
-					}
-				}
-				
-				if(!empty($this->modules[$module]->hooks) && is_array($this->modules[$module]->hooks))
-				{
-					foreach($this->modules[$module]->hooks as $hook)
-					{
-						if(in_array($hook, $allowed_hooks))
-						{
-							$this->modules_hooks[$hook][] = array('hook' => $hook, 'module' => $module);
-						}
-					}
-				}
-				else
-				{
-					echo "{$module}'s hook is not supported.";
-				}
-			}
-		}
-		elseif(is_bool($modules) && $modules === true)
-		{
-			foreach(glob($this->path . 'Library/Module/*.module.php') as $module)
-			{
-				require_once($module);
-				$module = strtolower(Helpers\Str::trim(str_replace('.module.php', '', basename($module))));
-				$class = ucfirst($module);
-				$this->modules[$module] = new $class($this);
-				if($module !== 'base')
-				{
-					echo "[INFO] Loaded: {$class}\n";
-					if(!empty($this->modules[$module]->regex))
-					{
-						$this->modules_regex[$module] = $this->modules[$module]->regex;
-					}
-					
-					if(!empty($this->modules[$module]->prefix))
-					{
-						$this->modules_prefix[$module] = $this->modules[$module]->prefix;
-					}
-					
-					if(!empty($this->modules[$module]->alias) && is_array($this->modules[$module]->alias))
-					{
-						foreach($this->modules[$module]->alias as $alias)
-						{
-							$this->modules_alias[$alias] = $module;
-						}
-					}
-					
-					if(!empty($this->modules[$module]->hooks) && is_array($this->modules[$module]->hooks))
-					{
-						foreach ($this->modules[$module]->hooks as $hook)
-						{
-							if(in_array($hook, $allowed_hooks))
-							{
-								$this->modules_hooks[$hook][] = array('hook' => $hook, 'module' => $module);
-							}
-							else
-							{
-								echo "[INFO] {$module}'s hook is not supported.";
-							}
-						}
-					}
-				}
-			}
-		}
-		elseif(file_exists($this->path . 'Library/Module/' . strtolower($modules) . '.module.php'))
-		{
-			$module = strtolower($modules);
-			echo $module . PHP_EOL;
-			require_once($this->path . 'Library/Module/' . $module . '.module.php');
-			$class = ucfirst($module);
-			$this->modules[$module] = new $class($this);
-			echo "[INFO]Loaded: {$class}\n";
-			
-			if(!empty($this->modules[$module]->regex))
-			{
-				$this->modules_regex[$module] = $this->modules[$module]->regex;
-			}
-			
-			if(!empty($this->modules[$module]->prefix))
-			{
-				$this->modules_prefix[$module] = $this->modules[$module]->prefix;
-			}
-			
-			if(!empty($this->modules[$module]->alias) && is_array($this->modules[$module]->alias))
-			{
-				foreach ($this->modules[$module]->alias as $alias)
-					$this->modules_alias[$alias] = $module;
-			}
-			
-			if(!empty($this->modules[$module]->hooks) && is_array($this->modules[$module]->hooks))
-			{
-				foreach ($this->modules[$module]->hooks as $hook)
-				{
-					if(in_array($hook, $allowed_hooks))
-					{
-						$this->modules_hooks[$hook][] = array('hook' => $hook, 'module' => $module);
-					}
-					else
-					{
-						echo "[INFO] {$module}'s hook is not supported.";
-					}
-				}
-			}
-		}
 	}
 	
 	public function expect($data, $what, $with)
@@ -498,29 +422,9 @@ class PhantomCore
 		}
 	}
 	
-	public function isConnected()
-	{
-		return is_resource($this->socket) && !feof($this->socket);
-	}
-	
-	public function listen()
-	{
-		if(!$this->isConnected())
-		{
-			die("\n\nReached end of socket.\n");
-		}
-		$data = fgets($this->socket, $this->size);
-		echo "[RECV] $data";
-		return $data;
-	}
-	
 	public function process($data)
 	{
 		$input = $this->input($data);
-		if(!is_resource($this->db))
-		{
-			// DB Stuff
-		}
 		
 		if(Helpers\Str::beginsWith('PING :', $data))
 		{
@@ -632,11 +536,5 @@ class PhantomCore
 				}
 			}
 		}
-	}
-	
-	public function disconnect($message = 'Quit command issued.')
-	{
-		$this->send('QUIT :' . Helpers\Str::trim($message));
-		fclose($this->socket);
 	}
 }

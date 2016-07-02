@@ -1,6 +1,8 @@
 <?php 
 
-class Help extends Base
+namespace Modules;
+
+class Help extends \Core\ModuleBase
 {
 	public $helpline = 'returns a list of all the available commands. %help command returns help about that command.';
 	
@@ -29,8 +31,8 @@ class Help extends Base
 				$commands[] = $alias;
 			}
 			natcasesort($commands);
-			$this->notice($socket, $sender, "Available {$that->prefix}commands: " . implode(', ', $commands));
-			$this->notice($socket, $sender, "Type {$that->prefix}help command to learn more about a command.");
+			$this->notice($socket, $sender, "Available Commands: " . str_replace('modules\\', '', implode(', ', $commands)));
+			$this->notice($socket, $sender, "Type '{$that->prefix}help command' to learn more about a command.");
 		}
 		else
 		{
