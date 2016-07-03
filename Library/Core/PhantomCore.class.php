@@ -258,9 +258,9 @@ class PhantomCore
 		{
 			echo "OPER **** *****\n";
 		}
-		elseif(strstr(trim($signal), 'NICKSERV :IDENTIFY'))
+		elseif(strstr(trim($signal), 'IDENTIFY'))
 		{
-			echo "PRIVMSG NICKSERV IDENTIFY ****";
+			echo "PRIVMSG NICKSERV :IDENTIFY ****";
 		}
 		else
 		{
