@@ -16,7 +16,7 @@ class Update extends \Core\ModuleBase
 			$null = shell_exec('git stash 2>&1');
 			$update = shell_exec('git pull --progress 2>&1');
 			
-			if(preg_match("/up to date/i", $update))
+			if(preg_match("/up to date/i", $update) || preg_match("/up-to-date/i", $update))
 			{
 				$this->privmsg($socket, $channel, 'Update: Bot is Already Up to Date');
 			}
