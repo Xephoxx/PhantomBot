@@ -6,6 +6,8 @@ class Dehop extends \Core\ModuleBase
 {
 	public $helpline = 'half ops the given nickname, only usable by +o and above.';
 	
+	public $minAcl = 4;	
+
 	public function process(&$that, &$socket, $data, $input, $command, $args)
 	{
 		$sender = $that->sender($data);

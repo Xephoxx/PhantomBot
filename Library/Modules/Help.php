@@ -6,6 +6,8 @@ class Help extends \Core\ModuleBase
 {
 	public $helpline = 'returns a list of all the available commands. %help command returns help about that command.';
 	
+	public $minAcl = 1;	
+
 	public function __construct($that)
 	{
 		$this->helpline = "returns a list of all the available commands. {$that->prefix}help command returns help about that command.";
@@ -16,23 +18,99 @@ class Help extends \Core\ModuleBase
 		$channel = $that->channel($data);
 		if(empty($args))
 		{
-			$commands = array();
-			foreach ($that->modules as $key => $module)
+			$commands = array('normal'=>array(), 'hop'=>array(), 'op'=>array(), 
+									'protect'=>array(), 'owner'=>array(), 'admin'=>array(), 'super'=>array());
+			foreach($that->modules as $key => $module)
 			{
 				$module = strtolower(get_class($module));
-				if($module !== 'module' && !isset($that->modules[$key]->noCommand))
+				if(!isset($that->modules[$key]->noCommand))
 				{
-					$commands[] = $module;
+					if($that->modules[$key]->minAcl <= 2)
+					{
+						// Normal
+						$commands['normal'][] = $module;
+					}
+					elseif($that->modules[$key]->minAcl == 3)
+					{
+						// Hoped
+						$commands['hop'][] = $module;
+					}
+					elseif($that->modules[$key]->minAcl == 4)
+					{
+						// Oped
+						$commands['op'][] = $module;
+					}
+					elseif($that->modules[$key]->minAcl == 5)
+					{
+						// Protected
+						$commands['protect'][] = $module;
+					}
+					elseif($that->modules[$key]->minAcl == 6)
+					{
+						// Ownered
+						$commands['owner'][] = $module;
+					}
+					elseif($that->modules[$key]->minAcl == 7)
+					{
+						// Admined
+						$commands['admin'][] = $module;
+					}
+					elseif($that->modules[$key]->minAcl == 8)
+					{
+						// SuperAdmined
+						$commands['super'][] = $module;
+					}
 				}
 			}
 			
+			/*
 			foreach($that->modules_alias as $alias => $module)
 			{
-				$commands[] = $alias;
+					if($that->modules[$alias]->minAcl <= 2)
+					{
+						// Normal
+						$commands['normal'][] = $alias;
+					}
+					elseif($that->modules[$alias]->minAcl == 3)
+					{
+						// Hoped
+						$commands['hop'][] = $alias;
+					}
+					elseif($that->modules[$alias]->minAcl == 4)
+					{
+						// Oped
+						$commands['op'][] = $alias;
+					}
+					elseif($that->modules[$alias]->minAcl == 5)
+					{
+						// Protected
+						$commands['protect'][] = $alias;
+					}
+					elseif($that->modules[$alias]->minAcl == 6)
+					{
+						// Ownered
+						$commands['owner'][] = $alias;
+					}
+					elseif($that->modules[$alias]->minAcl == 7)
+					{
+						// Admined
+						$commands['admin'][] = $alias;
+					}
+					elseif($that->modules[$alias]->minAcl == 8)
+					{
+						// Supered
+						$commands['super'][] = $alias;
+					}
 			}
-			
-			natcasesort($commands);
-			$this->notice($socket, $sender, "Available Commands: " . str_replace('modules\\', '', implode(', ', $commands)));
+			*/
+
+			$this->notice($socket, $sender, "Available Commands: " . str_replace('modules\\', '', implode(', ', $commands['normal'])));
+			$this->notice($socket, $sender, "+h Commands: " . str_replace('modules\\', '', implode(', ', $commands['hop'])));
+			$this->notice($socket, $sender, "+o Commands: " . str_replace('modules\\', '', implode(', ', $commands['op'])));
+			$this->notice($socket, $sender, "+a Commands: " . str_replace('modules\\', '', implode(', ', $commands['protect'])));
+			$this->notice($socket, $sender, "+q Commands: " . str_replace('modules\\', '', implode(', ', $commands['owner'])));
+			$this->notice($socket, $sender, "Admin Commands: " . str_replace('modules\\', '', implode(', ', $commands['admin'])));
+			$this->notice($socket, $sender, "Super Commands: " . str_replace('modules\\', '', implode(', ', $commands['super'])));
 			$this->notice($socket, $sender, "Type '{$that->prefix}help command' to learn more about a command.");
 		}
 		else

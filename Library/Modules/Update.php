@@ -6,6 +6,8 @@ class Update extends \Core\ModuleBase
 {
 	public $helpline = 'updates the bot.';
 	
+	public $minAcl = 8;	
+
 	public function process(&$that, &$socket, $data, $input, $command, $args)
 	{
 		$sender = $that->sender($data);

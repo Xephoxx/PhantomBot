@@ -301,15 +301,6 @@ class PhantomCore
 		$host = trim($host);
 		if(!empty($host))
 		{
-			//Override in case mysql connection is dead.
-			/*
-			$admins = array(
-				'x2fusion' => array(
-					'host'	=> '127.0.0.1',
-					'super'	=> true
-				)
-			);
-			*/
 			$admins = $this->config['admins'];			
 
 			if(isset($admins[strtolower($user)]))

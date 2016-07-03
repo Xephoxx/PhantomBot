@@ -6,6 +6,8 @@ class Voice extends \Core\ModuleBase
 {
 	public $helpline = 'voices the given nickname, only usable by +h and above.';
 	
+	public $minAcl = 3;
+	
 	public function process(&$that, &$socket, $data, $input, $command, $args)
 	{
 		$sender = $that->sender($data);
