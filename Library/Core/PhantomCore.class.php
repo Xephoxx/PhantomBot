@@ -152,8 +152,8 @@ class PhantomCore
 				{
 					break;
 				}
-			}			
-			echo "HELLO" . PHP_EOL;
+			}
+			
 			$joined = false;
 			while(!$joined)
 			{
@@ -258,7 +258,7 @@ class PhantomCore
 		{
 			echo "OPER **** *****\n";
 		}
-		elseif(strstr(trim($signal), 'NICKSERV IDENTIFY'))
+		elseif(strstr(trim($signal), 'NICKSERV :IDENTIFY'))
 		{
 			echo "PRIVMSG NICKSERV IDENTIFY ****";
 		}
