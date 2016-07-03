@@ -80,9 +80,9 @@ class PhantomCore
 			{
 				$data = fgets($this->socket, $this->size);
 				
-				if(trim($data) === '')
+				if(strlen($data) > 1)
 				{
-					echo '[RECV] ' . trim($data) . "\n";
+					echo '[RECV] ' . trim($data) . PHP_EOL;
 				}
 				
 				if(preg_match("/:Nickname is already in use.$/", Helpers\Str::trim($data)))
