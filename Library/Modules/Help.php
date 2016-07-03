@@ -103,14 +103,42 @@ class Help extends \Core\ModuleBase
 					}
 			}
 			*/
-
-			$this->notice($socket, $sender, "Available Commands: " . str_replace('modules\\', '', implode(', ', $commands['normal'])));
-			$this->notice($socket, $sender, "+h Commands: " . str_replace('modules\\', '', implode(', ', $commands['hop'])));
-			$this->notice($socket, $sender, "+o Commands: " . str_replace('modules\\', '', implode(', ', $commands['op'])));
-			$this->notice($socket, $sender, "+a Commands: " . str_replace('modules\\', '', implode(', ', $commands['protect'])));
-			$this->notice($socket, $sender, "+q Commands: " . str_replace('modules\\', '', implode(', ', $commands['owner'])));
-			$this->notice($socket, $sender, "Admin Commands: " . str_replace('modules\\', '', implode(', ', $commands['admin'])));
-			$this->notice($socket, $sender, "Super Commands: " . str_replace('modules\\', '', implode(', ', $commands['super'])));
+			
+			if(implode(', ', $commands['normal']) !== '')
+			{
+				$this->notice($socket, $sender, "Available Commands: " . str_replace('modules\\', '', implode(', ', $commands['normal'])));
+			}
+			
+			if(implode(', ', $commands['hop']) !== '')
+			{
+				$this->notice($socket, $sender, "+h Commands: " . str_replace('modules\\', '', implode(', ', $commands['hop'])));
+			}
+			
+			if(implode(', ', $commands['op']) !== '')
+			{
+				$this->notice($socket, $sender, "+o Commands: " . str_replace('modules\\', '', implode(', ', $commands['op'])));
+			}
+			
+			if(implode(', ', $commands['protect']) !== '')
+			{		
+				$this->notice($socket, $sender, "+a Commands: " . str_replace('modules\\', '', implode(', ', $commands['protect'])));
+			}
+			
+			if(implode(', ', $commands['owner']) !== '')
+			{
+				$this->notice($socket, $sender, "+q Commands: " . str_replace('modules\\', '', implode(', ', $commands['owner'])));
+			}
+			
+			if(implode(', ', $commands['admin']) !== '')
+			{
+				$this->notice($socket, $sender, "Admin Commands: " . str_replace('modules\\', '', implode(', ', $commands['admin'])));
+			}
+		
+			if(implode(', ', $commands['super']) !== '')
+			{
+				$this->notice($socket, $sender, "Super Commands: " . str_replace('modules\\', '', implode(', ', $commands['super'])));
+			}
+			
 			$this->notice($socket, $sender, "Type '{$that->prefix}help command' to learn more about a command.");
 		}
 		else
