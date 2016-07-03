@@ -50,6 +50,16 @@ class PhantomCore
 			$this->prefix = Helpers\Str::trim($config['server']['prefix']);
 		}
 		
+
+		$ctx = stream_context_create();
+		// Area to produce stream_contexts
+		
+		$this->socket = stream_socket_client(
+			$address.':'.$portnum, $errNo, $errStr, 60,
+			STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx
+		);		
+				
+		
 		$this->socket = stream_socket_client($address.':'.$portnum); //fsockopen($address, $portnum);
 		if($this->socket)
 		{
