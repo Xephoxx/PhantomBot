@@ -50,7 +50,7 @@ class PhantomCore
 			$this->prefix = Helpers\Str::trim($config['server']['prefix']);
 		}
 		die($address);
-		$this->socket = stream_socket_client($address.':'.$portnum, ) //fsockopen($address, $portnum);
+		$this->socket = stream_socket_client($address.':'.$portnum); //fsockopen($address, $portnum);
 		if($this->socket)
 		{
 			if(isset($config['server']['password']) && strlen($config['server']['password']))
