@@ -3,7 +3,7 @@
 namespace Core;
 use Modules;
 
-$path = str_replace('\\', '/', str_replace(array('Library/Core/PhantomCore.php', 'Library\Core\PhantomCore.php'), '', __FILE__));
+$path = str_replace('\\', '/', str_replace(array('Library/Core/PhantomCore.class.php', 'Library\Core\PhantomCore.class.php'), '', __FILE__));
 
 class PhantomCore
 {
@@ -100,8 +100,8 @@ class PhantomCore
 					$this->privmsg('NickServ', "identify {$config['server']['nickserv']}");
 					$nickserv = true;
 				}
-			}
-			
+			}	
+
 			$joined = false;
 			while(!$joined)
 			{
@@ -118,6 +118,27 @@ class PhantomCore
 					}
 				}
 				$joined = true;
+			}
+			
+			$opered = false;
+			while(!$opered)
+			{
+				$data = fgets($this->socket, $this->size);
+				echo '[RECV] ' . trim($data) . "\n";
+				
+				if($this->config['oline']['username'] !== '' && $this->config['oline']['password'] !== '')
+				{
+					$code = explode(' ', $data);
+					if($code[1] === '266')
+					{
+						$this->send('OPER ' . $this->config['oline']['username'] . ' ' . $this->config['oline']['password']);
+						//if(preg_match("/^/i"))
+					}
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
 	}	
@@ -265,13 +286,16 @@ class PhantomCore
 		if(!empty($host))
 		{
 			//Override in case mysql connection is dead.
+			/*
 			$admins = array(
 				'x2fusion' => array(
 					'host'	=> '127.0.0.1',
 					'super'	=> true
 				)
 			);
-			
+			*/
+			$admins = $this->config['admins'];			
+
 			if(isset($admins[strtolower($user)]))
 			{
 				if($admins[strtolower($user)]['host'] === strtolower($host))

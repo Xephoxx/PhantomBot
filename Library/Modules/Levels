@@ -1,0 +1,11 @@
+/*
+		LEVELS:
+			1 - regular
+			2 - voiced
+			3 - halfop
+			4 - op
+			5 - protected
+			6 - owner
+			7 - admin
+			8 - super admin
+*/

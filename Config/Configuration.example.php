@@ -25,6 +25,13 @@ return array(
 	'oline'	=> array(
 		'username'	=> '',
 		'password'	=> ''
+	),
+	
+	'admins'	=> array(
+		'nickname'	=> array(
+			'host'	=> '0.0.0.0',
+			'super'	=> true
+		)
 	)
 	
 );

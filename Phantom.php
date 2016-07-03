@@ -31,22 +31,8 @@ $bot = new Core\PhantomCore($shmop, $config);
 
 $bot->load(true);
 
-class Rehash
-{
-	public function __construct($file)
-	{
-		runkit_import($file, RUNKIT_IMPORT_CLASSES | RUNKIT_IMPORT_OVERRIDE);
-	}
-}
-
 while(true)
-{
-	if(shmop_read($shmop, 0, 1) == 1)
-	{
-		new Rehash('Library/Core/PhantomCore.php');
-		shmop_write($shmop, '1', 0);
-	}
-	
+{	
 	if($data = $bot->listen())
 	{
 		$bot->process($data);
