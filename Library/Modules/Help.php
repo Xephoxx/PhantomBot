@@ -109,32 +109,32 @@ class Help extends \Core\ModuleBase
 				$this->notice($socket, $sender, "Available Commands: " . str_replace('modules\\', '', implode(', ', $commands['normal'])));
 			}
 			
-			if(implode(', ', $commands['hop']) !== '')
+			if(implode(', ', $commands['hop']) !== '' && $that->getLevel($sender, $channel) == 3)
 			{
 				$this->notice($socket, $sender, "+h Commands: " . str_replace('modules\\', '', implode(', ', $commands['hop'])));
 			}
 			
-			if(implode(', ', $commands['op']) !== '')
+			if(implode(', ', $commands['op']) !== '' && $that->getLevel($sender, $channel) == 4)
 			{
 				$this->notice($socket, $sender, "+o Commands: " . str_replace('modules\\', '', implode(', ', $commands['op'])));
 			}
 			
-			if(implode(', ', $commands['protect']) !== '')
+			if(implode(', ', $commands['protect']) !== '' && $that->getLevel($sender, $channel) == 5)
 			{		
 				$this->notice($socket, $sender, "+a Commands: " . str_replace('modules\\', '', implode(', ', $commands['protect'])));
 			}
 			
-			if(implode(', ', $commands['owner']) !== '')
+			if(implode(', ', $commands['owner']) !== '' && $that->getLevel($sender, $channel) == 6)
 			{
 				$this->notice($socket, $sender, "+q Commands: " . str_replace('modules\\', '', implode(', ', $commands['owner'])));
 			}
 			
-			if(implode(', ', $commands['admin']) !== '')
+			if(implode(', ', $commands['admin']) !== '' && $that->getLevel($sender, '', $that->host($data)) == 7)
 			{
 				$this->notice($socket, $sender, "Admin Commands: " . str_replace('modules\\', '', implode(', ', $commands['admin'])));
 			}
 		
-			if(implode(', ', $commands['super']) !== '')
+			if(implode(', ', $commands['super']) !== '' && $that->getLevel($sender, '', $that->host($data)) == 8)
 			{
 				$this->notice($socket, $sender, "Super Commands: " . str_replace('modules\\', '', implode(', ', $commands['super'])));
 			}
