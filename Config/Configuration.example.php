@@ -5,9 +5,9 @@ return array(
 	'server'	=> array(
 		'address' 	=> '127.0.0.1',
 		'portnum' 	=> 6667,
-		'ssl'			=> false,
+		'ssl'		=> false,
 		'password'	=> '',
-		'prefix'		=> '@',
+		'prefix'	=> '@',
 		'channels'	=> array(
 			'#bot'
 		)
