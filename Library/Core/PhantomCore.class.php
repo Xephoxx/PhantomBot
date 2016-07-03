@@ -463,22 +463,11 @@ class PhantomCore
 			return;
 		}
 		
-		if(isset($this->config['joinOnInvite']) && $this->config['joinOnInvite'] === true)
+		if(isset($this->config['server']['invites']) && $this->config['server']['invites'] === true)
 		{
-			if(preg_match("/.*INVITE {$this->nick} :(#[#a-zA-Z0-9]+)/", $data, $match))
+			if(preg_match("/.*INVITE " . $this->nick . " :(#[#a-zA-Z0-9]+)/", $data, $match))
 			{
-				/*try
-				{
-					$channel = $this->db->prepare('INSERT INTO `channels` (`name`) VALUES (:channel)');
-					$channel->bindParam(':channel', $match[1], PDO::PARAM_STR);
-					$channel->execute();
-				}
-				catch (PDOException $e)
-				{
-					$this->logE($e);
-				}
 				$this->send('JOIN ' . $match[1]);
-				*/
 				return;
 			}
 		}
