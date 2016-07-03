@@ -133,25 +133,6 @@ class PhantomCore
 				}
 			}
 			
-			$joined = false;
-			while(!$joined)
-			{
-				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . PHP_EOL;	
-
-				foreach($config['server']['channels'] as $channel)
-				{
-					echo $channel . PHP_EOL;
-					@list($channel, $password) = explode(':', $channel);
-					if(Helpers\Str::beginsWith('#', $channel))
-					{
-						$this->send('JOIN ' . $channel . ' ' . $password);
-						usleep(250000);
-					}
-				}
-				$joined = true;
-			}
-			
 			$opered = false;
 			while(!$opered)
 			{
@@ -170,8 +151,25 @@ class PhantomCore
 				{
 					break;
 				}
-			}
+			}			
+			
+			$joined = false;
+			while(!$joined)
+			{
+				$data = fgets($this->socket, $this->size);
+				echo '[RECV] ' . trim($data) . PHP_EOL;	
 
+				foreach($config['server']['channels'] as $channel)
+				{
+					@list($channel, $password) = explode(':', $channel);
+					if(Helpers\Str::beginsWith('#', $channel))
+					{
+						$this->send('JOIN ' . $channel . ' ' . $password);
+						usleep(250000);
+					}
+				}
+				$joined = true;
+			}
 		}
 	}
 	
