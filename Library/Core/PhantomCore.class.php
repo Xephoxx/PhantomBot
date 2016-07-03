@@ -252,15 +252,15 @@ class PhantomCore
 		echo '[SEND] ';
 		if(strstr(trim($signal), 'PASS'))
 		{
-			echo "PASS ****\n";
+			echo 'PASS ****';
 		}
 		elseif(strstr(trim($signal), 'OPER'))
 		{
-			echo "OPER **** *****\n";
+			echo 'OPER **** *****' . PHP_EOL;
 		}
 		elseif(strstr(trim($signal), 'IDENTIFY'))
 		{
-			echo "PRIVMSG NICKSERV :IDENTIFY ****";
+			echo 'NICKSERV IDENTIFY ****' . PHP_EOL;
 		}
 		else
 		{
