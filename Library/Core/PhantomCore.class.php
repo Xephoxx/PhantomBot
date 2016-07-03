@@ -9,6 +9,7 @@ class PhantomCore
 {
 	public $socket;
 	public $nick;
+	public $nickCounter = 0;
 	public $size = 512;
 	public $prefix = '@';
 	public $modules;
@@ -73,23 +74,22 @@ class PhantomCore
 			$ident = isset($config['ident']['username']) ? $config['ident']['username'] : $this->nick;
 			$this->send('USER ' . $ident . ' * * :' . $config['ident']['realname']);
 			
+	
+
 			$count = 0;
 			$pinged = false;
 			while(!$pinged)
 			{
 				$data = fgets($this->socket, $this->size);
-				
-				if(strlen($data) > 1)
-				{
-					echo '[RECV] ' . trim($data) . PHP_EOL;
-				}
+				echo '[RECV] ' . trim($data) . PHP_EOL;
 				
 				if(preg_match("/:Nickname is already in use.$/", Helpers\Str::trim($data)))
 				{
-					die('Nickname not available.');
+					$this->nick = $this->nick . ($this->nickCounter++);
+					$this->send('NICK ' . $this->nick);
 				}
 				
-				if($count === 10)
+				if($count > 5)
 				{
 					break;
 				}
@@ -121,8 +121,8 @@ class PhantomCore
 			while(!$joined)
 			{
 				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . "\n";
-				
+				echo '[RECV] ' . trim($data) . "\n";	
+
 				foreach($config['server']['channels'] as $channel)
 				{
 					@list($channel, $password) = explode(':', $channel);
@@ -147,7 +147,6 @@ class PhantomCore
 					if($code[1] === '266')
 					{
 						$this->send('OPER ' . $this->config['oline']['username'] . ' ' . $this->config['oline']['password']);
-						//if(preg_match("/^/i"))
 					}
 				}
 				else
@@ -463,6 +462,12 @@ class PhantomCore
 			return;
 		}
 		
+		if(preg_match("/:Nickname is already in use./", Helpers\Str::trim($data)))
+		{
+			$this->nick = $this->nick . (++$this->nickCounter);
+			$this->send('NICK ' . $this->nick);
+		}
+		
 		if(isset($this->config['server']['invites']) && $this->config['server']['invites'] === true)
 		{
 			if(preg_match("/.*INVITE " . $this->nick . " :(#[#a-zA-Z0-9]+)/", $data, $match))
@@ -471,7 +476,7 @@ class PhantomCore
 				return;
 			}
 		}
-		
+
 		foreach($this->modules_regex as $class => $regex)
 		{
 			if(preg_match($regex, $data, $matches))
