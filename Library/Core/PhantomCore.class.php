@@ -153,7 +153,7 @@ class PhantomCore
 				}
 			}
 		}
-	}	
+	}
 	
 	public function load($modules)
 	{
