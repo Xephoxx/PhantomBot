@@ -50,23 +50,19 @@ class PhantomCore
 			$this->prefix = Helpers\Str::trim($config['server']['prefix']);
 		}
 		
-
-		$ctx = stream_context_create();
-		// Area to produce stream_contexts
 		$ctxOptions = array(
     		'ssl' => array(
         		'verify_peer' => false,
         		'verify_peer_name' => false
     		)
 		);
-		stream_context_set_default($ctxOptions);
+		$ctx = stream_context_create($ctxOptions);
 		$this->socket = stream_socket_client(
 			$address.':'.$portnum, $errNo, $errStr, 60,
 			STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx
-		);		
+		);
 				
-		
-		$this->socket = stream_socket_client($address.':'.$portnum); //fsockopen($address, $portnum);
+		#$this->socket = stream_socket_client($address.':'.$portnum); //fsockopen($address, $portnum);
 		if($this->socket)
 		{
 			if(isset($config['server']['password']) && strlen($config['server']['password']))
