@@ -117,7 +117,6 @@ class PhantomCore
 				
 				if($code[1] !== '401')
 				{
-					print_r($config['ident']);
 					$this->privmsg('NickServ', 'IDENTIFY ' . $config['ident']['nickserv']['password']);
 					$nickserv = true;
 				}
