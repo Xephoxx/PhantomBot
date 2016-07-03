@@ -74,8 +74,6 @@ class PhantomCore
 			$ident = isset($config['ident']['username']) ? $config['ident']['username'] : $this->nick;
 			$this->send('USER ' . $ident . ' * * :' . $config['ident']['realname']);
 			
-	
-
 			$count = 0;
 			$pinged = false;
 			while(!$pinged)
@@ -104,27 +102,47 @@ class PhantomCore
 				$count++;
 			}
 			
-			$nickserv = !isset($config['ident']['nickserv'])?false:true;
+			$count = 0;
+			$nickserv = (!isset($config['ident']['nickserv']['password'])||$config['ident']['nickserv']['password']==='')?true:false;
 			while(!$nickserv)
 			{
 				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . "\n";
+				echo '[RECV] ' . trim($data) . PHP_EOL;
+				
+				$code = explode(' ', $data);
+				if($code[1] === '266')
+				{
+					$this->privmsg('NickServ', 'help');
+				}
+				
+				if($code[1] !== '401')
+				{
+					print_r($config['ident']);
+					$this->privmsg('NickServ', 'IDENTIFY ' . $config['ident']['nickserv']['password']);
+					$nickserv = true;
+				}
 				
 				if(preg_match("/^\:NickServ\!NickServ@.* NOTICE {$this->nick} :This nickname is registered./i", Helpers\Str::trim($data)))
 				{
-					$this->privmsg('NickServ', "identify {$config['server']['nickserv']}");
+					$this->privmsg('NickServ', 'IDENTIFY ' . $config['ident']['nickserv']['password']);
 					$nickserv = true;
 				}
-			}	
-
+				
+				if($count > 5)
+				{
+					break;
+				}
+			}
+			
 			$joined = false;
 			while(!$joined)
 			{
 				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . "\n";	
+				echo '[RECV] ' . trim($data) . PHP_EOL;	
 
 				foreach($config['server']['channels'] as $channel)
 				{
+					echo $channel . PHP_EOL;
 					@list($channel, $password) = explode(':', $channel);
 					if(Helpers\Str::beginsWith('#', $channel))
 					{
@@ -139,7 +157,7 @@ class PhantomCore
 			while(!$opered)
 			{
 				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . "\n";
+				echo '[RECV] ' . trim($data) . PHP_EOL;
 				
 				if($this->config['oline']['username'] !== '' && $this->config['oline']['password'] !== '')
 				{
@@ -154,6 +172,7 @@ class PhantomCore
 					break;
 				}
 			}
+
 		}
 	}
 	
