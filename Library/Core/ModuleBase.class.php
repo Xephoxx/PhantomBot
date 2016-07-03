@@ -8,9 +8,9 @@ class ModuleBase
 	
 	protected function send($socket, $signal)
 	{
-		fputs($socket, Helpers\Str::trim($signal) . "\n");
+		fputs($socket, Helpers\Str::trim($signal) . PHP_EOL);
 		usleep(100000);
-		echo "[SEND] $signal\n";
+		echo '[SEND] ' . $signal . PHP_EOL;
 	}
 	
 	protected function privmsg($socket, $target, $message)
