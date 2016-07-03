@@ -61,7 +61,7 @@ class PhantomCore
 			$address.':'.$portnum, $errNo, $errStr, 60,
 			STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx
 		);
-				
+		
 		#$this->socket = stream_socket_client($address.':'.$portnum); //fsockopen($address, $portnum);
 		if($this->socket)
 		{
@@ -203,7 +203,7 @@ class PhantomCore
 				}
 			}
 		}
-	}	
+	}
 	
 	public function listen()
 	{
