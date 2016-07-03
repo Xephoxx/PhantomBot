@@ -108,33 +108,38 @@ class Help extends \Core\ModuleBase
 			{
 				$this->notice($socket, $sender, "Available Commands: " . str_replace('modules\\', '', implode(', ', $commands['normal'])));
 			}
-			
-			if(implode(', ', $commands['hop']) !== '' && $that->getLevel($sender, '', $that->host($data)) >= 3)
+				
+			$chanLevel = $that->getLevel($sender, $channel);
+			$userLevel = $that->getLevel($sender, '', $that->host($data));
+
+			echo 'chanLevel: ' . $chanLevel . PHP_EOL . 'userLevel: ' . $userLevel . PHP_EOL;
+
+			if(implode(', ', $commands['hop']) !== '' && ($chanLevel >= 3 || $userLevel >= 7))
 			{
 				$this->notice($socket, $sender, "+h Commands: " . str_replace('modules\\', '', implode(', ', $commands['hop'])));
 			}
 			
-			if(implode(', ', $commands['op']) !== '' && $that->getLevel($sender, '', $that->host($data)) >= 4)
+			if(implode(', ', $commands['op']) !== '' && ($chanLevel >= 4 || $userLevel >= 7))
 			{
 				$this->notice($socket, $sender, "+o Commands: " . str_replace('modules\\', '', implode(', ', $commands['op'])));
 			}
 			
-			if(implode(', ', $commands['protect']) !== '' && $that->getLevel($sender, '', $that->host($data)) >= 5)
-			{		
+			if(implode(', ', $commands['protect']) !== '' && ($chanLevel >= 5 || $userLevel >= 7))
+			{	
 				$this->notice($socket, $sender, "+a Commands: " . str_replace('modules\\', '', implode(', ', $commands['protect'])));
 			}
 			
-			if(implode(', ', $commands['owner']) !== '' && $that->getLevel($sender, '', $that->host($data)) >= 6)
+			if(implode(', ', $commands['owner']) !== '' && ($chanLevel >= 6 || $userLevel >= 7))
 			{
 				$this->notice($socket, $sender, "+q Commands: " . str_replace('modules\\', '', implode(', ', $commands['owner'])));
 			}
 			
-			if(implode(', ', $commands['admin']) !== '' && $that->getLevel($sender, '', $that->host($data)) >= 7)
+			if(implode(', ', $commands['admin']) !== '' && $userLevel >= 7)
 			{
 				$this->notice($socket, $sender, "Admin Commands: " . str_replace('modules\\', '', implode(', ', $commands['admin'])));
 			}
 		
-			if(implode(', ', $commands['super']) !== '' && $that->getLevel($sender, '', $that->host($data)) >= 8)
+			if(implode(', ', $commands['super']) !== '' && $userLevel >= 8)
 			{
 				$this->notice($socket, $sender, "Super Commands: " . str_replace('modules\\', '', implode(', ', $commands['super'])));
 			}
