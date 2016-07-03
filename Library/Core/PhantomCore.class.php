@@ -53,7 +53,13 @@ class PhantomCore
 
 		$ctx = stream_context_create();
 		// Area to produce stream_contexts
-		
+		$ctxOptions = array(
+    		'ssl' => array(
+        		'verify_peer' => false,
+        		'verify_peer_name' => false
+    		)
+		);
+		stream_context_set_default($ctxOptions);
 		$this->socket = stream_socket_client(
 			$address.':'.$portnum, $errNo, $errStr, 60,
 			STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx
