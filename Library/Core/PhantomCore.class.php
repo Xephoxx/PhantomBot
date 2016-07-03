@@ -145,6 +145,7 @@ class PhantomCore
 					if($code[1] === '266')
 					{
 						$this->send('OPER ' . $this->config['oline']['username'] . ' ' . $this->config['oline']['password']);
+						$opered = true;
 					}
 				}
 				else
@@ -152,7 +153,7 @@ class PhantomCore
 					break;
 				}
 			}			
-			
+			echo "HELLO" . PHP_EOL;
 			$joined = false;
 			while(!$joined)
 			{
