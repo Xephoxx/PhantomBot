@@ -30,6 +30,7 @@ class Help extends \Core\ModuleBase
 			{
 				$commands[] = $alias;
 			}
+			
 			natcasesort($commands);
 			$this->notice($socket, $sender, "Available Commands: " . str_replace('modules\\', '', implode(', ', $commands)));
 			$this->notice($socket, $sender, "Type '{$that->prefix}help command' to learn more about a command.");

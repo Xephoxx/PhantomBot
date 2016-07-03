@@ -79,7 +79,11 @@ class PhantomCore
 			while(!$pinged)
 			{
 				$data = fgets($this->socket, $this->size);
-				echo '[RECV] ' . trim($data) . "\n";
+				
+				if(trim($data) === '')
+				{
+					echo '[RECV] ' . trim($data) . "\n";
+				}
 				
 				if(preg_match("/:Nickname is already in use.$/", Helpers\Str::trim($data)))
 				{
