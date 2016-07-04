@@ -17,7 +17,7 @@ class Kick extends \Core\ModuleBase
 		$input = implode(' ', $input);
 		if($that->getLevel($sender, $channel) > 2 || $that->getLevel($sender, '', $that->host($data)) > 6)
 		{
-			$this->send($socket, 'KICK ' . $input);
+			$this->send($socket, 'KICK ' . $channel . ' ' . $input);
 			return;
 		}
 		else
