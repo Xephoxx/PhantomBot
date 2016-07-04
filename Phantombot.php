@@ -6,7 +6,8 @@ error_reporting(E_ALL);
 
 echo "[INFO] Linting files...\n";
 $cmd = 'find . -name "*.php" -print0 | xargs -0 -n1 -P8 php -l 2>&1 >/dev/null; echo $?';
-$lint = trim(@end(explode("\n", trim(system($cmd)))));
+$cmd = explode("\n", trim(system($cmd)));
+$lint = trim(@end($cmd));
 
 echo '[INFO] Status: ' . ($lint == 0 ? 'ok' : 'bad') . "\n";
 if($lint != 0)

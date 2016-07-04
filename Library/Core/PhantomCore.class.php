@@ -162,7 +162,11 @@ class PhantomCore
 
 				foreach($config['server']['channels'] as $channel)
 				{
-					@list($channel, $password) = explode(':', $channel);
+					$password = '';
+					if(count(explode(':', $channel)) > 1)
+					{
+						@list($channel, $password) = explode(':', $channel);
+					}
 					if(Helpers\Str::beginsWith('#', $channel))
 					{
 						$this->send('JOIN ' . $channel . ' ' . $password);
