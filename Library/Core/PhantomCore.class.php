@@ -178,7 +178,7 @@ class PhantomCore
 	{
 		$allowed_hooks = array(
 			'beforeCommand',
-			'beforePrefix',
+			//'beforePrefix',
 		);
 		
 		foreach(glob($this->path . 'Library/Modules/*.php') as $module)
@@ -189,23 +189,23 @@ class PhantomCore
 			$this->modules[$module] = new $class($this);
 			echo "[INFO] Loaded: {$class}\n";
 			
-			if(!empty($this->modules[$module]->regex))
+			/*if(!empty($this->modules[$module]->regex))
 			{
 				$this->modules_regex[$module] = $this->modules[$module]->regex;
-			}
+			}*/
 			
-			if(!empty($this->modules[$module]->prefix))
+			/*if(!empty($this->modules[$module]->prefix))
 			{
 				$this->modules_prefix[$module] = $this->modules[$module]->prefix;
-			}
+			}*/
 			
-			if(!empty($this->modules[$module]->alias) && is_array($this->modules[$module]->alias))
+			/*if(!empty($this->modules[$module]->alias) && is_array($this->modules[$module]->alias))
 			{
 				foreach($this->modules[$module]->alias as $alias)
 				{
 					$this->modules_alias[$alias] = $module;
 				}
-			}
+			}*/
 			
 			if(!empty($this->modules[$module]->hooks) && is_array($this->modules[$module]->hooks))
 			{
@@ -228,10 +228,13 @@ class PhantomCore
 	{
 		if(!$this->isConnected())
 		{
-			die("\n\nReached end of socket.\n");
+			die('Reached end of socket.' . PHP_EOL);
 		}
 		$data = fgets($this->socket, $this->size);
-		echo "[RECV] $data";
+		if(strlen($data)>0)
+		{
+			echo '[RECV] ' . $data;
+		}
 		return $data;
 	}	
 	
@@ -494,15 +497,15 @@ class PhantomCore
 			}
 		}
 
-		foreach($this->modules_regex as $class => $regex)
+		/*foreach($this->modules_regex as $class => $regex)
 		{
 			if(preg_match($regex, $data, $matches))
 			{
 				$this->modules[$class]->match($this, $this->socket, Helpers\Str::trim($data), $matches);
 			}
-		}
+		}*/
 		
-		foreach($this->modules_prefix as $class => $prefix)
+		/*foreach($this->modules_prefix as $class => $prefix)
 		{
 			if(Helpers\Str::beginsWith($prefix, $input))
 			{
@@ -531,12 +534,12 @@ class PhantomCore
 					$this->modules[$class]->prefix($this, $this->socket, Helpers\Str::trim($data), $input, $command, $pinput);
 				}
 			}
-		}
+		}*/
 		
 		if(Helpers\Str::beginsWith($this->prefix, $input))
 		{
 			$command = strtolower($this->command($input));
-			if(!($command == 'module') && (isset($this->modules[$command]) || (isset($this->modules_alias[$command]) && isset($this->modules[$this->modules_alias[$command]]))))
+			if(/*!*/(/*$command == 'module') && */(isset($this->modules[$command]) /*|| (isset($this->modules_alias[$command]) && isset($this->modules[$this->modules_alias[$command]])*/)))
 			{
 				/*
 				 LEVELS:
@@ -564,16 +567,17 @@ class PhantomCore
 						}
 					}
 				}
+				
 				if($okay)
 				{
 					if(isset($this->modules[$command]))
 					{
 						$this->modules[$command]->process($this, $this->socket, Helpers\Str::trim($data), $input, $command, Helpers\Str::after($this->prefix . $this->command($input), $input));
 					}
-					elseif(isset($this->modules_alias[$command]) && isset($this->modules[$this->modules_alias[$command]]))
+					/*elseif(isset($this->modules_alias[$command]) && isset($this->modules[$this->modules_alias[$command]]))
 					{
 						$this->modules[$this->modules_alias[$command]]->process($this, $this->socket, Helpers\Str::trim($data), $input, $command, Helpers\Str::after($this->prefix . $this->command($input), $input));
-					}
+					}*/
 				}
 			}
 		}

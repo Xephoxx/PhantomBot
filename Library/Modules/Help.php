@@ -25,40 +25,44 @@ class Help extends \Core\ModuleBase
 				$module = strtolower(get_class($module));
 				if(!isset($that->modules[$key]->noCommand))
 				{
-					if($that->modules[$key]->minAcl <= 2)
+					switch(intval($that->modules[$key]->minAcl))
 					{
-						// Normal
-						$commands['normal'][] = $module;
-					}
-					elseif($that->modules[$key]->minAcl == 3)
-					{
-						// Hoped
-						$commands['hop'][] = $module;
-					}
-					elseif($that->modules[$key]->minAcl == 4)
-					{
-						// Oped
-						$commands['op'][] = $module;
-					}
-					elseif($that->modules[$key]->minAcl == 5)
-					{
-						// Protected
-						$commands['protect'][] = $module;
-					}
-					elseif($that->modules[$key]->minAcl == 6)
-					{
-						// Ownered
-						$commands['owner'][] = $module;
-					}
-					elseif($that->modules[$key]->minAcl == 7)
-					{
-						// Admined
-						$commands['admin'][] = $module;
-					}
-					elseif($that->modules[$key]->minAcl == 8)
-					{
-						// SuperAdmined
-						$commands['super'][] = $module;
+						default:
+						case 1:
+						case 2:
+							// Normal
+							$commands['normal'][] = $module;
+						break;
+						
+						case 3:
+							// Hoped
+							$commands['hop'][] = $module;
+						break;
+						
+						case 4:
+							// Oped
+							$commands['op'][] = $module;
+						break;
+						
+						case 5:
+							// Protected
+							$commands['protect'][] = $module;
+						break;
+						
+						case 6:
+							// Ownered
+							$commands['owner'][] = $module;
+						break;
+						
+						case 7:
+							// Admined
+							$commands['admin'][] = $module;
+						break;
+						
+						case 8:
+							// SuperAdmined
+							$commands['super'][] = $module;
+						break;
 					}
 				}
 			}
@@ -112,7 +116,8 @@ class Help extends \Core\ModuleBase
 			$chanLevel = $that->getLevel($sender, $channel);
 			$userLevel = $that->getLevel($sender, '', $that->host($data));
 
-			echo 'chanLevel: ' . $chanLevel . PHP_EOL . 'userLevel: ' . $userLevel . PHP_EOL;
+			echo '[INFO] chanLevel: ' . $chanLevel . PHP_EOL;
+			echo '[INFO] userLevel: ' . $userLevel . PHP_EOL;
 
 			if(implode(', ', $commands['hop']) !== '' && ($chanLevel >= 3 || $userLevel >= 7))
 			{
@@ -150,16 +155,16 @@ class Help extends \Core\ModuleBase
 		{
 			$help = explode(' ', $args);
 			$help = $help[0];
-			if(isset($that->modules[strtolower($help)]) || isset($that->modules_alias[strtolower($help)]))
+			if(isset($that->modules[strtolower($help)]) /*|| isset($that->modules_alias[strtolower($help)])*/)
 			{
-				if(isset($that->modules[strtolower($help)]->helpline) && !empty($that->modules[strtolower($help)]->helpline))
+				if(isset($that->modules[strtolower($help)]->helpline) /*&& !empty($that->modules[strtolower($help)]->helpline)*/)
 				{
 					$this->notice($socket, $sender, "{$help}--" . $that->modules[strtolower($help)]->helpline);
 				}
-				elseif(isset($that->modules[@$that->modules_alias[strtolower($help)]]->helpline) || !empty($that->modules[@$that->modules_alias[strtolower($help)]]->helpline))
+				/*elseif(isset($that->modules[@$that->modules_alias[strtolower($help)]]->helpline) || !empty($that->modules[@$that->modules_alias[strtolower($help)]]->helpline))
 				{
 					$this->notice($socket, $sender, "{$help}--" . $that->modules[$that->modules_alias[strtolower($help)]]->helpline);
-				}
+				}*/
 				else
 				{
 					$this->notice($socket, $sender, "Command {$help} does not have any help information.");
