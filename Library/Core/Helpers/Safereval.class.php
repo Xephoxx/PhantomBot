@@ -202,7 +202,7 @@ class Safereval {
 		'T_ENDFOREACH',			// foreach, alternative syntax
 		'T_ENDIF',			// if, alternative syntax
 		'T_ENDSWITCH',			// switch, alternative syntax
-		'T_FOR',			// for
+//		'T_FOR',			// for
 		'T_FOREACH',			// foreach
 		'T_IF',				// if
 		'T_INC',			// incrementing/decrementing operators
@@ -237,7 +237,7 @@ class Safereval {
 		'T_UNSET',			// unset()
 		'T_UNSET_CAST',			// (not documented; casts to NULL)
 		'T_VARIABLE',			// variables
-		'T_WHILE',			// while, do..while
+//		'T_WHILE',			// while, do..while
 		'T_WHITESPACE',			// 
 		'T_XOR_EQUAL',			// assignment operators
 	);
