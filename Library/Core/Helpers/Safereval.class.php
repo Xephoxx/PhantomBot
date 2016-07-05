@@ -251,7 +251,8 @@ class Safereval {
 //		'/(\]|\})\s*\//',		// Comment after parentheses: "] /" or "} /"
 	);
 	
-	function SaferEval() {
+	function __construct() {
+		/*
 		global $allowedCalls;
 		global $allowedTokens;
 		global $globalVariables;
@@ -261,14 +262,25 @@ class Safereval {
 		$this->allowedTokens = $allowedTokens;
 		$this->globalVariables = $globalVariables;
 		$this->allowedVariables = $allowedVariables;
-		$this->disallowedExpressions = $disallowedExpressions;
+		$this->disallowedExpressions = $disallowedExpressions;*/
 	}
 
 	function evalSyntax($code) { // Separate function for checking syntax without breaking the script
-		ob_start(); // Catch potential parse error messages
+		/*ob_start(); // Catch potential parse error messages
 		$code = eval('if(0){' . "\n" . $code . "\n" . '}'); // Put $code in a dead code sandbox to prevent its execution
 		ob_end_clean();
-		return $code !== false;
+		return $code !== false;*/
+/*
+		$data = file_get_contents('http://phpcodechecker.com/api/?code=' . urlencode($code));
+		$data = json_decode($data, 1);
+		print_r($data);
+		
+		if($data['errors'] === TRUE)
+		{
+			return $data['syntax']['message'] !== false;
+		}
+*/	
+		return false;
 	}
 
 	function checkScript($code, $execute) {
@@ -350,8 +362,13 @@ class Safereval {
 				global $$globalVariable;
 			}
 			ob_start();
+			if($this->code{strlen($this->code)-1} !== ';')
+			{
+				$this->code = $this->code . ';';
+			}
 			eval($this->code);
 			$this->output = ob_get_contents();
+			echo $this->output;
 			ob_end_clean();
 		}
 	}

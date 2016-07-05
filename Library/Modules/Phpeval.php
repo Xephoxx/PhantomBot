@@ -20,13 +20,17 @@ class Phpeval extends \Core\ModuleBase
 		$input = stripslashes($input);
 		$input = stripcslashes($input);		
 
+		$data = file_get_contents('http://phpcodechecker.com/api/?code=' . urlencode($input));
+		$data = json_decode($data, 1);
+		//print_r($data);
+
 		$se = new \Core\Helpers\Safereval();
-		$errors = $se->checkScript($input, 1);
-		if(!$errors)
+		if(!$data['errors'])
 		{
 			$GLOBALS = NULL;
 			$_GLOBALS = NULL;
-			if(strlen($se->output))
+			$se->checkScript($input, 1);
+			if(strlen($se->output)>1)
 			{
 				$this->privmsg($socket, $channel, '[PHP] ' . $se->output);
 			}
@@ -37,7 +41,15 @@ class Phpeval extends \Core\ModuleBase
 		}
 		else
 		{
-			$errors = explode('|||', $se->errors($errors));
+			if(isset($data['syntax']['message']))
+			{
+				$errors = array($data['syntax']['message']);
+			}
+			else
+			{
+				$errors = $se->checkScript($input, 0);
+				$errors = explode('|||', $se->errors($errors));
+			}
 			foreach($errors as $error)
 			{
 				if(strlen($error))
