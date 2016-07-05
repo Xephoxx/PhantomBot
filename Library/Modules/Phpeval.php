@@ -19,10 +19,19 @@ class Phpeval extends \Core\ModuleBase
 		$input = implode(' ', $input);
 		
 		$safephp = new \Core\Helpers\Safephp();
+		
 		if($safephp->parse($input))
 		{
+			$GLOBALS = NULL;
 			$safephp->evaluate($input);
-			$this->privmsg($socket, $channel, '[PHP] ' . $safephp->output);
+			if(strlen($safephp->output))
+			{
+				$this->privmsg($socket, $channel, '[PHP] ' . $safephp->output);
+			}
+			else
+			{
+				$this->privmsg($socket, $channel, '[PHP] There was no output from your code!');
+			}
 		}
 		else
 		{

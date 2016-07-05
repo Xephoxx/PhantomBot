@@ -10,8 +10,8 @@ class Safephp {
      * @access public
      */
     public function __construct() {
-        set_error_handler(array('\Core\Helpers\Safephp', 'error_handler'));
-        register_shutdown_function(array('\Core\Helpers\Safephp', 'fatal_error_handler'));
+       	set_error_handler(array('\Core\Helpers\Safephp', 'error_handler'));
+         register_shutdown_function(array('\Core\Helpers\Safephp', 'fatal_error_handler'));
     }
     /**
      * SafePHP get_setting
@@ -44,10 +44,14 @@ class Safephp {
      * @return boolean
      */
     public function parse($code) {
-        ob_start();
-        $code = eval('if(0){' . $code . '}');
-        ob_end_clean();
-        return $code !== false;
+			$checkResult = exec('echo \'<?php ' . $code . '\' | php -l >/dev/null 2>&1; echo $?');
+			
+			if($checkResult != 0)
+			{
+    			return false;
+			}
+        	
+			return true;
     }
     /**
      * SafePHP evaluate
@@ -128,7 +132,7 @@ class Safephp {
         ob_start(array($this, 'dump_json'));
         $this->start = microtime(true);
 		if (empty($this->errors)) {
-			eval($this->code);
+			@eval($this->code);
 			$this->output = ob_get_contents();
 		}
 		ob_end_flush();
@@ -215,7 +219,7 @@ class Safephp {
         if ($error !== NULL) {
         		echo PHP_EOL;
         		print_r($error);
-            //echo $error['message'] . PHP_EOL;
+            echo '[INFO] ' . $error['message'] . PHP_EOL;
         }
     }
     /**
