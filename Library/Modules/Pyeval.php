@@ -21,7 +21,7 @@ class Pyeval extends \Core\ModuleBase
 		$input = stripcslashes($input);
 		
 		$data = file_get_contents('http://eval.appspot.com/eval?statement=' . urlencode($input));
-
-		$this->privmsg($socket, $channel, '[PY] ' . $data);
+		
+		$this->privmsg($socket, $channel, '[PY] ' . (strlen($data)?$data:'There was no output from your code!'));
 	}
 }
