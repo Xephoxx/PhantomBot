@@ -361,10 +361,10 @@ class Safereval {
 			$this->errors = $errors;
 			$this->errorsHTML = '';
 			foreach ($this->errors as $error) {
-				if ($error['line']) {
-					$this->errorsHTML .= 'Line #'.$error['line'].'';
+				if (@$error['line']) {
+					$this->errorsHTML .= 'Line #'.$error['line'].' ';
 				}
-				$this->errorsHTML .= ' '.$error['name']. '|||';
+				$this->errorsHTML .= ''.$error['name']. '|||';
 			}
 			return($this->errorsHTML);
 		}
