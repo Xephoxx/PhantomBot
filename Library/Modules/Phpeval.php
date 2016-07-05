@@ -21,12 +21,11 @@ class Phpeval extends \Core\ModuleBase
 		$input = stripcslashes($input);
 		
 		$se = new \Core\Helpers\Safereval();
+		$GLOBALS = NULL;
+		$_GLOBALS = NULL;
 		$errors = $se->checkScript($input, 1);
 		if(!is_array($errors))
 		{
-			$GLOBALS = NULL;
-			$_GLOBALS = NULL;
-			$errors = $se->checkScript($input, 1);
 			if(strlen($se->output))
 			{
 				$this->privmsg($socket, $channel, '[PHP] ' . $se->output);
