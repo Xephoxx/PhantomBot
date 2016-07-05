@@ -22,7 +22,8 @@ class Pyeval extends \Core\ModuleBase
 		
 		$data = file_get_contents('http://eval.appspot.com/eval?statement=' . urlencode($input));
 		
-		$lines = explode("\n", $data);		
+		$lines = explode("\n", $data);
+		$lines = array_splice($lines, 0, count($lines)-1);
 		foreach($lines as $line)
 		{
 			$this->privmsg($socket, $channel, '[PY] ' . (strlen($data)?$line:'There was no output from your code!'));
