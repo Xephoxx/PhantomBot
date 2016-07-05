@@ -5,10 +5,10 @@ namespace Core\Helpers;
 class Safereval {
 	var $source;
    
-   var $allowedVariables = array (
+   /*var $allowedVariables = array (
 		'$v',
 		'$i',
-	);
+	);*/
 	
 	var $globalVariables = array (
 		'v',
@@ -165,7 +165,8 @@ class Safereval {
 		'trim', 		// Strip whitespace (or other characters) from the beginning and end of a string
 		'ucfirst', 		// Make a string's first character uppercase
 		'ucwords', 		// Uppercase the first character of each word in a string
-		'wordwrap', 		// Wraps a string to a given number of characters	
+		'wordwrap', 		// Wraps a string to a given number of characters
+		'php_eol',		// EOL
 	);
 	
 	var $allowedTokens = array (
