@@ -270,17 +270,23 @@ class Safereval {
 		$code = eval('if(0){' . "\n" . $code . "\n" . '}'); // Put $code in a dead code sandbox to prevent its execution
 		ob_end_clean();
 		return $code !== false;*/
-/*
-		$data = file_get_contents('http://phpcodechecker.com/api/?code=' . urlencode($code));
-		$data = json_decode($data, 1);
-		print_r($data);
 		
-		if($data['errors'] === TRUE)
+		$tmpfname = tempnam("/tmp", "pEval-");
+		$handle = fopen($tmpfname, "w");
+		fwrite($handle, '<?php ' . $code);
+		fclose($handle);
+		exec('php -l ' . $tmpfname . '', $code, $retval) . PHP_EOL;
+		unlink($tmpfname);
+		
+		$syntax = strstr($code[0], 'No syntax errors detected')?true:false;
+		
+		if(!$syntax)
 		{
-			return $data['syntax']['message'] !== false;
+			$this->errors[0]['message'] = substr($code[1], 0, strlen($code[1])-30);
+			return false;
 		}
-*/	
-		return false;
+		
+		return true;
 	}
 
 	function checkScript($code, $execute) {
@@ -300,17 +306,21 @@ class Safereval {
 			}
 		}
 
+		$syntax = $this->evalSyntax($this->code);
+		//die($syntax);	
+
 		if (empty($this->errors)) {
 			if ($this->braces) $this->errors[0]['name'] = 'Unbalanced braces.';
 		}
 
 		// STEP 2: SYNTAX - Check if syntax is valid
-		else if (!$this->evalSyntax($this->code)) {
-			$this->errors[0]['name'] = 'Syntax error.';
+		else if (!$syntax) {
+			$this->errors[0]['name'] = $this->errors[0]['message'];
 		}
 
 		// STEP 3: EXPRESSIONS - Check against various insecure elements
-		if (empty($this->errors)) foreach ($this->disallowedExpressions as $disallowedExpression) {
+		if (empty($this->errors))
+		foreach ($this->disallowedExpressions as $disallowedExpression) {
 			unset($matches);
 			preg_match($disallowedExpression, $this->code, $matches);
 			if($matches) {
@@ -362,10 +372,6 @@ class Safereval {
 				global $$globalVariable;
 			}
 			ob_start();
-			if($this->code{strlen($this->code)-1} !== ';')
-			{
-				$this->code = $this->code . ';';
-			}
 			eval($this->code);
 			$this->output = ob_get_contents();
 			echo $this->output;
