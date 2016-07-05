@@ -13,20 +13,22 @@ class Phpeval extends \Core\ModuleBase
 		$sender = $that->sender($data);
 		$channel = $that->channel($data);
 		
-		//print_r($args);
 		$input = explode(' ', $that->input($data));
 		unset($input[0]);
 		$input = implode(' ', $input);
 		
-		$safephp = new \Core\Helpers\Safephp();
-		
-		if($safephp->parse($input))
+		$input = stripslashes($input);
+		$input = stripcslashes($input);		
+
+		$se = new \Core\Helpers\Safereval();
+		$errors = $se->checkScript($input, 1);
+		if(!$errors)
 		{
 			$GLOBALS = NULL;
-			$safephp->evaluate($input);
-			if(strlen($safephp->output))
+			$_GLOBALS = NULL;
+			if(strlen($se->output))
 			{
-				$this->privmsg($socket, $channel, '[PHP] ' . $safephp->output);
+				$this->privmsg($socket, $channel, '[PHP] ' . $se->output);
 			}
 			else
 			{
@@ -35,7 +37,14 @@ class Phpeval extends \Core\ModuleBase
 		}
 		else
 		{
-			$this->privmsg($socket, $channel, '[PHP] You have an error in your code!');
+			$errors = explode('|||', $se->errors($errors));
+			foreach($errors as $error)
+			{
+				if(strlen($error))
+				{
+					$this->privmsg($socket, $channel, '[PHP] ' . $error);
+				}
+			}
 		}
 	}
 }
