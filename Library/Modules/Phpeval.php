@@ -43,6 +43,7 @@ class Phpeval extends \Core\ModuleBase
 		{
 			if(isset($data['syntax']['message']))
 			{
+				
 				$errors = array($data['syntax']['message']);
 			}
 			else
