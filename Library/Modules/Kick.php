@@ -17,7 +17,12 @@ class Kick extends \Core\ModuleBase
 		$input = implode(' ', $input);
 		if($that->getLevel($sender, $channel) > 2 || $that->getLevel($sender, '', $that->host($data)) > 6)
 		{
-			$this->send($socket, 'KICK ' . $channel . ' ' . $input);
+			if($that->getLevel($that->nick, $channel) > 2)
+			{
+				$this->send($socket, 'KICK ' . $channel . ' ' . $input);
+				return;
+			}
+			$this->privmsg($socket, $channel, "{$sender}: I am not authorized to do that.");
 			return;
 		}
 		else
