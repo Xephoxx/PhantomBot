@@ -17,7 +17,12 @@ class Op extends \Core\ModuleBase
 		$input = implode(' ', $input);
 		if($that->getLevel($sender, $channel) > 3 || $that->getLevel($sender, '', $that->host($data)) > 6)
 		{
-			$this->send($socket, 'MODE ' . $channel . ' +o ' . $input);
+			if($that->getLevel($that->nick, $channel) > 3)
+			{
+				$this->send($socket, 'MODE ' . $channel . ' +o ' . $input);
+				return;
+			}
+			$this->privmsg($socket, $channel, "{$sender}: I am not authorized to do that.");
 			return;
 		}
 		else
