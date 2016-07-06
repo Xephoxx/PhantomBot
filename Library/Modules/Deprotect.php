@@ -22,7 +22,7 @@ class Deprotect extends \Core\ModuleBase
 				$this->send($socket, 'MODE ' . $channel . ' -a ' . $input);
 				return;
 			}
-			$this->privmsg($socket, $channel, "{$sender}: I am not authorized to do that."));
+			$this->privmsg($socket, $channel, "{$sender}: I am not authorized to do that.");
 			return;
 		}
 		else
