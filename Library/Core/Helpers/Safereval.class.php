@@ -166,7 +166,6 @@ class Safereval {
 		'ucfirst', 		// Make a string's first character uppercase
 		'ucwords', 		// Uppercase the first character of each word in a string
 		'wordwrap', 		// Wraps a string to a given number of characters
-		'php_eol',		// EOL
 	);
 	
 	var $allowedTokens = array (
